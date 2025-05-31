@@ -1,0 +1,66 @@
+resource "null_resource" "download_file" {
+  provisioner "local-exec" {
+    command = "curl -o /tmp/sample-1.txt https://getsamplefiles.com/download/txt/sample-1.txt"
+  }
+}
+
+
+terraform init
+terraform apply
+terraform show
+terraform destroy
+
+
+======================================================
+
+
+
+1. Use null_resource with local-exec provisioner to run a shell command
+You can use a null_resource with the local-exec provisioner to execute shell commands like curl or wget to download files to your local machine or a target instance.
+
+Example: Download a file locally
+
+
+resource "null_resource" "download_file" {
+  provisioner "local-exec" {
+    command = "curl -o downloaded_file.txt https://example.com/file.txt"
+  }
+}
+Run terraform apply and Terraform will execute this command on the machine where Terraform runs.
+
+2. Use Terraform providers that support file downloading or file resources
+For some cloud providers, you might upload files to cloud storage or download files as part of provisioning.
+
+You can use the http data source to fetch content from a URL (not for large files):
+
+
+data "http" "example_file" {
+  url = "https://example.com/file.txt"
+}
+
+resource "local_file" "example" {
+  content  = data.http.example_file.body
+  filename = "downloaded_file.txt"
+}
+This downloads the file content into a Terraform-managed local file.
+
+3. Download files on remote machines
+If you want to download a file on a remote VM or instance, you can use provisioners with remote-exec or use user data scripts (like in EC2) to download files during instance provisioning.
+
+Example using remote-exec provisioner:
+
+resource "aws_instance" "example" {
+  # instance config...
+
+  provisioner "remote-exec" {
+    inline = [
+      "curl -o /tmp/file.txt https://example.com/file.txt"
+    ]
+  }
+}
+Summary
+Method	Use Case	Notes
+null_resource + local-exec	Download to local machine	Requires curl/wget installed locally
+data "http" + local_file	Small files, local download	Limited size, directly managed by Terraform
+remote-exec provisioner	Download files on remote server	Needs SSH access & curl/wget on server
+User data or startup scripts	On instance launch	Often best for cloud VM setups
