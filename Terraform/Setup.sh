@@ -24,6 +24,22 @@ curl -LO "https://dl.k8s.io/release/v1.33.0/bin/linux/amd64/kubectl"
 chmod +x kubectl
 sudo mv kubectl /usr/local/bin/
 
+TERRAFORM_VERSION="1.12.1"
+echo "⬇️ Downloading Terraform $TERRAFORM_VERSION..."
+curl -LO "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+
+echo "🗂 Unzipping Terraform..."
+unzip -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+
+echo "🚚 Moving Terraform binary to /usr/local/bin..."
+sudo mv terraform /usr/local/bin/
+
+echo "🧹 Cleaning up..."
+rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip LICENSE.txt
+
+echo "✅ Terraform installation complete!"
+terraform version
+
 echo "Downloading and installing Helm v3.14.3..."
 curl -LO https://get.helm.sh/helm-v3.14.3-linux-amd64.tar.gz
 tar -zxvf helm-v3.14.3-linux-amd64.tar.gz
