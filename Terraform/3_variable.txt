@@ -1,0 +1,244 @@
+What is variable.tf?
+Purpose:
+The variable.tf file is where you define input variables for your Terraform configuration. These variables allow you to parameterize your infrastructure code, making it reusable and flexible.
+
+What does it contain?
+It contains variable blocks that specify the name, type, default values (optional), description, and validation rules of the variables you want to use.
+
+Example of a variable definition:
+
+
+variable "region" {
+  description = "The AWS region to deploy resources"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "instance_count" {
+  description = "Number of EC2 instances to create"
+  type        = number
+  default     = 2
+}
+Why use it?
+
+Makes your code configurable without changing the code itself.
+
+Helps reuse the same Terraform code across different environments (dev, staging, prod) by passing different variable values.
+
+Keeps your configuration organized.
+
+What is main.tf?
+Purpose:
+The main.tf file is usually the primary configuration file where you define the actual infrastructure resources you want Terraform to create or manage.
+
+What does it contain?
+It contains resource blocks, provider blocks, data sources, and uses the variables defined in variable.tf.
+
+Example of usage:
+
+Suppose in variable.tf you have a variable named region and instance_count as shown above.
+
+Then in main.tf you can refer to these variables like this:
+
+
+provider "aws" {
+  region = var.region
+}
+
+resource "aws_instance" "example" {
+  count         = var.instance_count
+  ami           = "ami-0c55b159cbfafe1f0"   # example AMI ID
+  instance_type = "t2.micro"
+}
+Key points:
+
+var.region and var.instance_count refer to the variables defined in variable.tf.
+
+Terraform replaces these variables with the values provided by the user (via CLI, .tfvars file, environment variables, or defaults).
+
+The main.tf describes what resources you want and how to configure them.
+
+Summary
+File	Purpose	Usage Example
+variable.tf	Declare input variables for flexibility and reusability	Define variable "region" { type = string }
+main.tf	Define resources and use variables to configure them	Use var.region inside provider or resource block
+
+////////////////////////////////////////////////
+
+Explanation in Simple Terms
+1. What is variable.tf?
+It’s a Terraform file where you declare variables you want to use in your Terraform configuration.
+
+Variables let you customize the behavior of your Terraform code without changing the code itself.
+
+Example:
+
+variable "file_path" {
+  description = "Path where the file will be created"
+  type        = string
+  default     = "/tmp/aj.txt"
+}
+
+variable "file_content" {
+  description = "Content to write in the file"
+  type        = string
+  default     = "Started terraform"
+}
+2. How is variable.tf used in main.tf (or any .tf file like your local.tf)?
+In your resource block, you replace fixed values with the variables you declared.
+
+For example, modifying your local.tf to use variables:
+
+
+resource "local_file" "aj" {
+  filename = var.file_path
+  content  = var.file_content
+}
+Here, var.file_path and var.file_content refer to variables declared in variable.tf.
+
+Why use this approach?
+Flexibility: You can easily change the file path or content without changing the resource code.
+
+Reusability: You can reuse the same Terraform configuration in different environments or situations by just changing variable values.
+
+Parameterization: Makes your Terraform code cleaner and easier to manage.
+
+Putting it all together:
+variable.tf declares variables.
+
+main.tf (or local.tf) uses those variables to create resources dynamically.
+
+Example:
+variable.tf:
+
+variable "file_path" {
+  description = "File path to create"
+  type        = string
+  default     = "/tmp/aj.txt"
+}
+
+variable "file_content" {
+  description = "Content to write in file"
+  type        = string
+  default     = "Started terraform"
+}
+main.tf (or local.tf):
+
+
+resource "local_file" "aj" {
+  filename = var.file_path
+  content  = var.file_content
+}
+
+============================================
+
+✅ Different Types of Variables in variable.tf
+1. String
+A single line of text.
+
+
+variable "region" {
+  description = "AWS region to deploy"
+  type        = string
+  default     = "us-east-1"
+}
+2. Number
+An integer or floating-point number.
+
+
+variable "instance_count" {
+  description = "Number of instances"
+  type        = number
+  default     = 3
+}
+3. Bool
+A true/false value.
+
+
+variable "enable_logging" {
+  description = "Whether to enable logging"
+  type        = bool
+  default     = true
+}
+4. List
+An ordered collection of values (e.g., strings or numbers).
+
+
+variable "availability_zones" {
+  description = "List of AZs"
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b"]
+}
+Usage in main.tf:
+
+
+element(var.availability_zones, 0)  # gets "us-east-1a"
+5. Set
+Similar to a list but unordered and cannot contain duplicates.
+
+
+variable "allowed_ips" {
+  description = "Set of IPs"
+  type        = set(string)
+  default     = ["10.0.0.1", "10.0.0.2"]
+}
+6. Map
+A collection of key-value pairs (like a dictionary in Python).
+
+
+variable "instance_type_map" {
+  description = "Map of instance types per environment"
+  type        = map(string)
+  default = {
+    dev  = "t2.micro",
+    prod = "t3.medium"
+  }
+}
+Usage:
+
+
+var.instance_type_map["dev"]
+7. Object
+A complex variable with named attributes.
+
+
+variable "db_config" {
+  description = "Database configuration"
+  type = object({
+    username = string
+    password = string
+    port     = number
+  })
+  default = {
+    username = "admin"
+    password = "secret"
+    port     = 5432
+  }
+}
+Usage:
+
+
+var.db_config.username
+8. Tuple
+A fixed-length list of values of different types.
+
+
+variable "example_tuple" {
+  description = "Example tuple"
+  type        = tuple([string, number, bool])
+  default     = ["hello", 42, true]
+}
+Usage:
+
+
+element(var.example_tuple, 1)  # returns 42
+🔁 Summary Table
+Type	Description	Example Syntax
+string	A single string value	type = string
+number	Numeric value (int or float)	type = number
+bool	Boolean value	type = bool
+list	Ordered sequence of same type	type = list(string)
+set	Unordered unique values of same type	type = set(string)
+map	Key-value pairs	type = map(string)
+object	Group of named attributes	type = object({ key = type, ... })
+tuple	Ordered collection of fixed types	type = tuple([type1, type2, ...])
