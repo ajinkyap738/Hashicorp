@@ -1,0 +1,92 @@
+📦 What is a Resource in Terraform?
+A resource represents a single piece of infrastructure that Terraform manages. 
+Each resource block describes one or more infrastructure objects, like:
+
+An AWS EC2 instance (aws_instance)
+
+An Azure Storage Account (azurerm_storage_account)
+
+A GCP Compute Engine (google_compute_instance)
+
+A Kubernetes Pod (kubernetes_pod)
+
+🛠️ Resource Syntax
+
+resource "<PROVIDER>_<RESOURCE_TYPE>" "<RESOURCE_NAME>" {
+  # Configuration arguments
+  key1 = "value1"
+  key2 = "value2"
+}
+Example: AWS EC2 Instance
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "web_server" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "WebServer"
+  }
+}
+🧩 Resource Block Breakdown
+Part	Description
+resource	Terraform block type
+"aws_instance"	Provider and type of resource
+"web_server"	User-defined name for the resource (used to reference elsewhere)
+{ ... }	Configuration for the resource (key-value pairs)
+
+🔗 Referencing Resources
+Resources can reference each other using:
+
+
+resource "aws_security_group" "web_sg" {
+  name = "web_sg"
+}
+
+resource "aws_instance" "web_server" {
+  ami           = "ami-id"
+  instance_type = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+}
+🔄 Resource Lifecycle Commands
+Command	Purpose
+terraform init	Initializes the configuration
+terraform plan	Shows what will be created/changed
+terraform apply	Provisions the resources
+terraform destroy	Deletes the resources
+
+🧠 Notes
+Each resource must be unique in its name within the same Terraform module.
+
+Resources can be grouped using modules for reusability.
+
+You can use count or for_each to create multiple resources.
+
+🧪 Example: Create 3 S3 Buckets Using Count
+
+resource "aws_s3_bucket" "bucket" {
+  count = 3
+  bucket = "my-bucket-${count.index}"
+  acl    = "private"
+}
+
+========================================================================
+
+Create the folder by using the terraform
+
+resource "local_file" "aj" {
+  filename = "/tmp/aj.txt"
+  content  = "Started terraform"
+}
+
+
+terraform init
+terraform plan
+terraform apply
+cat /tmp/aj.txt
+
+
+=======================================================================================
