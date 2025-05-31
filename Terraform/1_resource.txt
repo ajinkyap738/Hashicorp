@@ -86,7 +86,9 @@ resource "local_file" "aj" {
 terraform init
 terraform plan
 terraform apply
+terraform show
 cat /tmp/aj.txt
+terraform destroy
 
 
 =======================================================================================
