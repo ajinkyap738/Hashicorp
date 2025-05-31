@@ -242,3 +242,118 @@ set	Unordered unique values of same type	type = set(string)
 map	Key-value pairs	type = map(string)
 object	Group of named attributes	type = object({ key = type, ... })
 tuple	Ordered collection of fixed types	type = tuple([type1, type2, ...])
+
+
+===================================================================================
+
+
+In Terraform, variables help make configurations more flexible and reusable. There are multiple ways to define and assign values to variables. Here’s a breakdown of each method:
+
+✅ 1. variables.tf (or *.tf file)
+This file defines variable declarations — not the values.
+
+
+# variables.tf
+variable "region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-1"   # Optional
+}
+You can also define variables in main.tf or anyname.tf file — it's a naming convention, not a rule.
+
+✅ 2. terraform.tfvars
+Used to assign values to the variables defined above.
+
+
+# terraform.tfvars
+region = "us-west-2"
+Automatically loaded by Terraform.
+
+Only one terraform.tfvars file is used unless overridden.
+
+✅ 3. *.auto.tfvars
+Any file ending with .auto.tfvars (like dev.auto.tfvars, prod.auto.tfvars) is automatically loaded, just like terraform.tfvars.
+
+
+# dev.auto.tfvars
+region = "us-east-2"
+Useful for environment-based variable files.
+
+✅ 4. Command Line (-var)
+You can define variable values inline when running Terraform:
+
+
+terraform apply -var="region=us-west-1"
+Useful for scripting or temporary overrides.
+
+✅ 5. Command Line (-var-file)
+You can specify a custom variable file manually:
+
+
+terraform apply -var-file="custom.tfvars"
+✅ 6. Environment Variables
+Prefix the variable name with TF_VAR_:
+
+
+export TF_VAR_region=us-west-1
+Terraform will pick this up automatically.
+
+🔁 Variable Precedence (Order of Priority)
+When the same variable is set in multiple places, Terraform follows this order (higher to lower):
+
+-var command line flag
+
+-var-file command line flag
+
+Environment variables (TF_VAR_)
+
+terraform.tfvars file
+
+*.auto.tfvars files
+
+Default in variable definition (in variables.tf)
+
+Summary Table:
+File/Method	Purpose	Loaded Automatically?	Can Override?
+variables.tf	Variable declaration	Yes	No (declaration only)
+terraform.tfvars	Assign variable values	Yes	Yes
+*.auto.tfvars	Assign variable values	Yes	Yes
+-var flag	Assign variable values	No	Yes (highest)
+-var-file flag	Assign variable values	No	Yes
+TF_VAR_ environment	Assign variable values	Yes	Yes
+
+
+=========================================================
+
+In Terraform, when the same variable is defined in multiple places, Terraform uses a specific order of precedence to decide which value to use.
+
+🔝 Terraform Variable Precedence (Highest to Lowest Priority)
+Priority	Source	Example
+1️⃣	Command line -var	terraform apply -var="region=us-east-1"
+2️⃣	Command line -var-file	terraform apply -var-file="prod.tfvars"
+3️⃣	Environment variable	export TF_VAR_region=us-east-2
+4️⃣	terraform.tfvars file	File named exactly terraform.tfvars
+5️⃣	*.auto.tfvars files	Files like dev.auto.tfvars, staging.auto.tfvars
+6️⃣	Default value in .tf file	default = "us-east-3" inside variables.tf
+
+💡 Example
+Given this variable:
+
+
+# variables.tf
+variable "region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-3"
+}
+If you have:
+
+terraform.tfvars → region = "us-west-1"
+
+dev.auto.tfvars → region = "us-west-2"
+
+Environment → TF_VAR_region="us-west-3"
+
+Command line → -var="region=us-west-4"
+
+Then Terraform will use: us-west-4 (from CLI) ✅
