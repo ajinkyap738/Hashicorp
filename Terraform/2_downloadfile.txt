@@ -10,7 +10,8 @@ terraform apply
 terraform show
 terraform destroy
 
-
+terraform init -auto-approve
+terraform destroy -auto-approve
 ======================================================
 
 
